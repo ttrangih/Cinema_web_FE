@@ -1,42 +1,56 @@
+import { useEffect, useState } from "react";
 import MovieCard from "../components/MovieCard";
+import { fetchMovies } from "../services/api";
 
 export default function Home() {
-  // Demo dữ liệu phim
-  const movies = [
-    {
-      id: 1,
-      title: "Avengers: Endgame",
-      posterUrl: "https://m.media-amazon.com/images/I/81ExhpBEbHL._AC_SY679_.jpg"
-    },
-    {
-      id: 2,
-      title: "Jurassic World",
-      posterUrl: "https://m.media-amazon.com/images/I/91F12Qv7lQL._AC_SY679_.jpg"
-    },
-    {
-      id: 3,
-      title: "Interstellar",
-      posterUrl: "https://m.media-amazon.com/images/I/91kFYg4fX3L._AC_SY679_.jpg"
-    }
-  ];
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  useEffect(() => {
+    console.log("Home mounted");
+    async function load() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await fetchMovies(1, "");
+        console.log("Movies from API:", data);
+
+        // backend trả posterurl → map sang posterUrl cho MovieCard
+        const normalized = (data.items || []).map((m) => ({
+          ...m,
+          posterUrl: m.posterurl || m.posterUrl,
+        }));
+
+        setMovies(normalized);
+      } catch (err) {
+        console.error("Failed to load movies:", err);
+        setError("Không tải được danh sách phim");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+  }, []);
+
+
+
+  if (loading) return <div className="p-6 text-xl">Đang tải phim...</div>;
+  if (error) return <div className="p-6 text-red-500">{error}</div>;
   return (
-    <div style={{
-      padding: "20px",
-      display: "grid",
-      gridTemplateColumns: "repeat(3, 1fr)",
-      gap: "20px"
-    }}>
-      {movies.map(movie => (
+    <div
+      style={{
+        padding: "20px",
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: "20px",
+      }}
+    >
+      {movies.map((movie) => (
         <MovieCard key={movie.id} movie={movie} />
       ))}
-
-      
-    <div className="text-3xl font-bold text-red-500">
-      Tailwind đã hoạt động!
-    </div>
-
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -9,17 +9,20 @@ import Checkout from "./pages/Checkout";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <div className="bg-[#222] min-h-screen text-white">
       <Navbar />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/movie/:id" element={<MovieDetail />} />
-        <Route path="/showtimes/:id" element={<Showtimes />} />
-        <Route path="/seats/:id" element={<Seats />} />
-        <Route path="/checkout" element={<Checkout />} />
-      </Routes>
-
-    </BrowserRouter>
+      <main className="pt-16">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/showtimes/:id" element={<Showtimes />} />
+          <Route path="/seats/:id" element={<Seats />} />
+          <Route path="/checkout" element={<Checkout />} />
+          {/* fallback: nếu lạc route thì vẫn trả Home */}
+          <Route path="*" element={<Home />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
