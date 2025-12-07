@@ -12,9 +12,13 @@ export default function App() {
     <div className="bg-[#222] min-h-screen text-white">
       <Navbar />
 
-      <main className="pt-16">
+      <main className="pt-20">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/movies/now" element={<Home />} />
+          <Route path="/movies/soon" element={<Home />} />
+          <Route path="/cinemas" element={<Home />} />
+          <Route path="/my-tickets" element={<Home />} />
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/showtimes/:id" element={<Showtimes />} />
           <Route path="/seats/:id" element={<Seats />} />

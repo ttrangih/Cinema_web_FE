@@ -26,14 +26,16 @@ export default function Home() {
   }, [page]);
 
   return (
-    <div style={{ padding: "20px" }}>
-      {/* ==== GRID LAYOUT GIỮ NGUYÊN ==== */}
+    <div style={{ padding: "80px" }}>
+      {/* ==== GRID LAYOUT==== */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",   // giống layout cũ
+          gridTemplateColumns: "repeat(5, 1fr)",  
           gap: "35px",
           justifyItems: "center",
+          maxWidth: "1400px",
+          margin: "0 auto"
         }}
       >
         {movies.map((movie) => (
