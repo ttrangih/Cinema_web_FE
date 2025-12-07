@@ -40,17 +40,19 @@ export default function Home() {
   if (loading) return <div className="p-6 text-xl">Đang tải phim...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
   return (
-    <div
-      style={{
-        padding: "20px",
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "20px",
-      }}
-    >
-      {movies.map((movie) => (
-        <MovieCard key={movie.id} movie={movie} />
-      ))}
-    </div>
-  );
+  <div
+    style={{
+      padding: "32px 24px",
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "24px",
+      maxWidth: "1200px",
+      margin: "0 auto",
+    }}
+  >
+    {movies.map((movie) => (
+      <MovieCard key={movie.id} movie={movie} />
+    ))}
+  </div>
+);
 }

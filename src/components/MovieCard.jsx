@@ -9,11 +9,16 @@ export default function MovieCard({ movie }) {
       textAlign: "center",
       boxShadow: "0 2px 5px rgba(0,0,0,0.1)"
     }}>
-      <img 
-        src={movie.posterUrl} 
-        alt={movie.title} 
-        style={{ width: "100%", borderRadius: "6px" }}
-      />
+      <img
+      src={movie.posterUrl}
+      alt={movie.title}
+      style={{
+        width: "100%",
+        height: "360px",        // cố định chiều cao
+        objectFit: "cover",     // tự crop ảnh
+        borderRadius: "6px"
+  }}
+/>
       <h3 style={{ marginTop: "10px", fontSize: "18px" }}>{movie.title}</h3>
 
       <Link
