@@ -6,7 +6,7 @@ export default function Navbar() {
 
   // user hiện tại
   const [user, setUser] = useState(null);
-  const displayName = user?.fullName || user?.fullname || user?.email || "";
+  const displayName = user?.fullname || user?.email || "";
  
 
 
