@@ -10,6 +10,10 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
+export const loginApi = (email, password) => {
+  return api.post ("auth/login", {email, password});
+};
+
 //Movies
 export const fetchMovies = async (page = 1, q = "") => {
   const res = await api.get("/movies", {

@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 import MovieDetail from "./pages/MovieDetail";
 import Showtimes from "./pages/Showtimes";
 import Seats from "./pages/Seats";
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/movies/now" element={<Home />} />
           <Route path="/movies/soon" element={<Home />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/cinemas" element={<Home />} />
           <Route path="/my-tickets" element={<Home />} />
           <Route path="/movie/:id" element={<MovieDetail />} />

@@ -2,19 +2,48 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
-  const [openMenu, setOpenMenu] = useState(null); // chia thành 3 ô
   const navigate = useNavigate();
 
+  // user hiện tại
+  const [user, setUser] = useState(null);
+  const displayName = user?.fullName || user?.fullname || user?.email || "";
+
+
+  // dropdown đang mở: "phim" | "rap" | null
+  const [openMenu, setOpenMenu] = useState(null);
+
+  // đọc user từ localStorage khi Navbar mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem("user");
-      if (stored) setUser(JSON.parse(stored));
-    } catch (e) {
-      console.error("Cannot parse user from localStorage", e);
+      if (stored) {
+        setUser(JSON.parse(stored));
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      console.error("Cannot parse user from localStorage", err);
+      setUser(null);
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/");
+  };
+
+  const toggleMenu = (key) => {
+    setOpenMenu((prev) => (prev === key ? null : key));
+  };
+
+  const go = (path) => {
+    navigate(path);
+    setOpenMenu(null);
+  };
+
+  // ===== styles =====
   const navStyle = {
     width: "100%",
     background: "#111",
@@ -68,9 +97,7 @@ export default function Navbar() {
     gap: "4px",
   };
 
-  const dropdownContainerStyle = {
-    position: "relative",
-  };
+  const dropdownContainerStyle = { position: "relative" };
 
   const dropdownStyle = {
     position: "absolute",
@@ -106,19 +133,10 @@ export default function Navbar() {
     cursor: "pointer",
   };
 
-  const handleDropdownClick = (menuKey) => {
-    setOpenMenu((prev) => (prev === menuKey ? null : menuKey));
-  };
-
-  const go = (path) => {
-    navigate(path);
-    setOpenMenu(null);
-  };
-
   return (
     <nav style={navStyle}>
       <div style={containerStyle}>
-        {/* Logo trái */}
+        {/* Logo */}
         <Link to="/" style={logoStyle}>
           CINEMA
         </Link>
@@ -126,15 +144,15 @@ export default function Navbar() {
         {/* Menu giữa */}
         <div style={menuWrapperStyle}>
           <ul style={menuListStyle}>
-            {/* PHIM + dropdown */}
+            {/* PHIM */}
             <li style={dropdownContainerStyle}>
               <span
                 style={menuLinkStyle}
-                onClick={() => handleDropdownClick("phim")}
+                onClick={() => toggleMenu("phim")}
               >
-                <span>Phim</span>
-                <span style={{ fontSize: "10px" }}>▼</span>
+                Phim <span style={{ fontSize: "10px" }}>▼</span>
               </span>
+
               {openMenu === "phim" && (
                 <div style={dropdownStyle}>
                   <span
@@ -153,15 +171,15 @@ export default function Navbar() {
               )}
             </li>
 
-            {/* RẠP + dropdown */}
+            {/* RẠP */}
             <li style={dropdownContainerStyle}>
               <span
                 style={menuLinkStyle}
-                onClick={() => handleDropdownClick("rap")}
+                onClick={() => toggleMenu("rap")}
               >
-                <span>Rạp</span>
-                <span style={{ fontSize: "10px" }}>▼</span>
+                Rạp <span style={{ fontSize: "10px" }}>▼</span>
               </span>
+
               {openMenu === "rap" && (
                 <div style={dropdownStyle}>
                   <span
@@ -170,30 +188,56 @@ export default function Navbar() {
                   >
                     Tất cả chi nhánh
                   </span>
-                  {/* sau này có thể thêm chi nhánh A/B/C */}
                 </div>
               )}
             </li>
 
             {/* Vé của tôi */}
             <li>
-              <Link to="/my-tickets" style={menuLinkStyle}>
+              <span
+                style={menuLinkStyle}
+                onClick={() => go("/my-tickets")}
+              >
                 Vé của tôi
-              </Link>
+              </span>
             </li>
           </ul>
         </div>
 
-        {/* Đăng nhập / user phải */}
+        {/* Góc phải: user hoặc Đăng nhập */}
         <div>
           {user ? (
-            <span style={{ color: "#fff", fontWeight: 500 }}>
-              {user.fullName || user.email || "User"}
-            </span>
+            <div
+              style={{
+                color: "#fff",
+                fontWeight: 500,
+                display: "flex",
+                gap: "12px",
+                alignItems: "center",
+              }}
+            >
+              <span>{displayName}</span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "transparent",
+                  border: "1px solid #666",
+                  color: "#ccc",
+                  padding: "4px 10px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Đăng xuất
+              </button>
+            </div>
           ) : (
-            <Link to="/login" style={loginButtonStyle}>
+            <button
+              onClick={() => navigate("/login")}
+              style={loginButtonStyle}
+            >
               Đăng nhập
-            </Link>
+            </button>
           )}
         </div>
       </div>
