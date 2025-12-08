@@ -10,17 +10,27 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
+//login
 export const loginApi = (email, password) => {
-  return api.post ("/auth/login", {email, password});
+  return api
+    .post("/auth/login", { email, password })
+    .then((res) => res.data);   // trả về body { token, user }
 };
 
-//Movies
+//register
+export const registerApi = (fullName, email, password) => {
+  return api
+    .post("/auth/register", { fullName, email, password })
+    .then((res) => res.data); // trả về data
+};
+
+//movies
 export const fetchMovies = async (page = 1, q = "") => {
   const res = await api.get("/movies", {
     params: { page, q },
   });
 
-  // Log URL thực tế được gọi (để debug nếu cần)
+  // Log URL thực tế được gọi (để debug)
   console.log(
     "[API] GET",
     res.config.baseURL + res.config.url,

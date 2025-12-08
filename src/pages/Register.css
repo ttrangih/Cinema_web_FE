@@ -1,0 +1,110 @@
+
+.register-page {
+  min-height: calc(100vh - 64px); /* trừ chiều cao navbar nếu navbar ~64px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+  color: #f4f4f5;
+}
+
+
+.register-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/*lỗi */
+.register-error {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #fecaca;
+  background-color: rgba(127, 29, 29, 0.3);
+  border: 1px solid rgba(248, 113, 113, 0.7);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* Form */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Group mỗi input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label */
+.form-label {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* Input */
+.form-input {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #3f3f46;
+  background-color: #101013;
+  color: #f4f4f5;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #8b5cf6;
+}
+
+/* Nút đăng ký */
+.btn-register {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background-color: #8b5cf6;
+  color: #f4f4f5;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-register:hover {
+  background-color: #7c3aed;
+}
+
+/* Footer dưới form */
+.register-footer {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #e4e4e7;
+}
+
+.link-login {
+  color: #a855f7;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link-login:hover {
+  color: #c4b5fd;
+}

@@ -7,6 +7,7 @@ export default function Navbar() {
   // user hiện tại
   const [user, setUser] = useState(null);
   const displayName = user?.fullName || user?.fullname || user?.email || "";
+ 
 
 
   // dropdown đang mở: "phim" | "rap" | null
@@ -148,7 +149,9 @@ export default function Navbar() {
             <li style={dropdownContainerStyle}>
               <span
                 style={menuLinkStyle}
-                onClick={() => toggleMenu("phim")}
+                onMouseEnter={() => setOpenMenu("phim")}
+                onMouseLeave={() => setOpenMenu(null)}
+
               >
                 Phim <span style={{ fontSize: "10px" }}>▼</span>
               </span>
@@ -175,7 +178,9 @@ export default function Navbar() {
             <li style={dropdownContainerStyle}>
               <span
                 style={menuLinkStyle}
-                onClick={() => toggleMenu("rap")}
+                onMouseEnter={() => setOpenMenu("rap")}
+                onMouseLeave={() => setOpenMenu(null)}
+
               >
                 Rạp <span style={{ fontSize: "10px" }}>▼</span>
               </span>

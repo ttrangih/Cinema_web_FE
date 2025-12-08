@@ -1,105 +1,92 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginApi } from "../services/api";
-
+import "./Login.css"; 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+
+    if (!email || !password) {
+      setError("Vui lòng nhập đầy đủ email và mật khẩu.");
+      return;
+    }
 
     try {
-      const res = await loginApi(email, password);
+      const data = await loginApi(email, password);
 
-      // Backend trả { token, user }
-      const { token, user } = res.data;
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Lưu vào localStorage để Navbar dùng
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      setLoading(false);
-      navigate("/");// quay về trang chủ
+      navigate("/");
     } catch (err) {
-      console.error(err);
-      setLoading(false);
-      const status = err.response?.status;
       console.error("Login error:", err);
+      const status = err?.response?.status;
 
-       // Mapping lỗi theo API
-      switch (status) {
-        case 400:
-          setError("Vui lòng nhập đầy đủ email và mật khẩu.");
-          break;
-        case 401:
-          setError("Email hoặc mật khẩu không đúng.");
-          break;
-        case 500:
-          setError("Lỗi server. Vui lòng thử lại sau.");
-          break;
-        default:
-          setError("Đăng nhập không thành công. Vui lòng thử lại.");
+      if (status === 400) {
+        setError("Thiếu email hoặc password. Vui lòng nhập đầy đủ.");
+      } else if (status === 401) {
+        setError("Sai email hoặc password. Vui lòng thử lại.");
+      } else if (status === 500) {
+        setError("Lỗi server. Vui lòng thử lại sau.");
+      } else {
+        setError("Có lỗi xảy ra. Vui lòng thử lại.");
       }
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-neutral-900 border border-neutral-700 rounded-xl p-8 shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">Đăng nhập</h1>
+    <div className="login-page">
+      <div className="login-card">
+        <h3 className="login-title">Đăng nhập tài khoản</h3>
 
-        {error && (
-          <div className="mb-4 text-sm text-red-400 bg-red-900/30 border border-red-500 rounded-md px-3 py-2">
-            {error}
-          </div>
-        )} {/*báo lỗi */}
+        {error && <div className="login-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email */}
-          <div>
-            <label className="block mb-1 text-sm font-medium">
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label className="form-label" htmlFor="email">
               Email
             </label>
             <input
+              id="email"
               type="email"
-              className="w-full rounded-md px-3 py-2 bg-neutral-800 border border-neutral-600 focus:outline-none focus:border-indigo-400"
+              className="form-input"
+              placeholder="Nhập email của bạn"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
             />
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block mb-1 text-sm font-medium">
+          <div className="form-group">
+            <label className="form-label" htmlFor="password">
               Mật khẩu
             </label>
             <input
+              id="password"
               type="password"
-              className="w-full rounded-md px-3 py-2 bg-neutral-800 border border-neutral-600 focus:outline-none focus:border-indigo-400"
+              className="form-input"
+              placeholder="Nhập mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••"
-              required
             />
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-2 rounded-md bg-indigo-500 hover:bg-indigo-600 disabled:bg-neutral-600 disabled:cursor-not-allowed text-white font-semibold py-2 transition"
-          >
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          <button type="submit" className="btn-login">
+            Đăng nhập
           </button>
         </form>
+
+        <p className="login-footer">
+          Bạn chưa có tài khoản?{" "}
+          <Link to="/register" className="link-register">
+            Đăng ký
+          </Link>
+        </p>
       </div>
     </div>
   );
