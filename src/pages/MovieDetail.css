@@ -1,0 +1,157 @@
+.movie-detail-page {
+  padding: 80px 24px 32px; /* chừa chỗ cho navbar fixed */
+  min-height: 100vh;
+  background-color: #111111;
+  color: #f4f4f5;
+  box-sizing: border-box;
+}
+
+/* layout chính */
+.movie-detail-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .movie-detail-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+/* poster */
+.movie-detail-poster {
+  width: 100%;
+  max-width: 330px;
+}
+
+.movie-detail-poster img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  display: block;
+}
+
+/* info */
+.movie-detail-info {
+  flex: 1;
+  padding: 4px 8px;
+}
+
+.movie-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.movie-description {
+  font-size: 14px;
+  color: #e5e5e5;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.movie-meta {
+  font-size: 14px;
+  color: #d4d4d8;
+  margin-bottom: 16px;
+}
+
+.movie-meta .meta-label {
+  font-weight: 600;
+}
+
+/* nút trailer */
+.btn-trailer {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background-color: #ef4444;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.btn-trailer:hover {
+  background-color: #b91c1c;
+}
+
+/* suất chiếu */
+.showtimes-section {
+  max-width: 1100px;
+  margin: 32px auto 0;
+}
+
+.showtimes-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.error-text {
+  color: #f97373;
+  font-size: 14px;
+}
+
+.no-showtimes {
+  font-size: 14px;
+  color: #a1a1aa;
+}
+
+.showtimes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.showtime-cinema-card {
+  background-color: #18181b;
+  border-radius: 12px;
+  border: 1px solid #3f3f46;
+  padding: 12px 16px;
+}
+
+.showtime-cinema-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cinema-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cinema-address {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.showtime-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.showtime-chip {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid #8b5cf6;
+  background-color: transparent;
+  color: #e9d5ff;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.showtime-chip:hover {
+  background-color: #8b5cf6;
+  color: #ffffff;
+}
