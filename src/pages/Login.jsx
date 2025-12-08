@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginApi } from "../services/api";
 import "./Login.css"; 
+
+
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -23,6 +25,7 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
+      window.dispatchEvent(new Event("user-updated"));
       navigate("/");
     } catch (err) {
       console.error("Login error:", err);

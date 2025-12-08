@@ -14,19 +14,18 @@ export default function Navbar() {
   const [openMenu, setOpenMenu] = useState(null);
 
   // đọc user từ localStorage khi Navbar mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("user");
-      if (stored) {
-        setUser(JSON.parse(stored));
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
-      console.error("Cannot parse user from localStorage", err);
-      setUser(null);
-    }
-  }, []);
+ useEffect(() => {
+  const updateUser = () => {
+    const stored = localStorage.getItem("user");
+    setUser(stored ? JSON.parse(stored) : null);
+  };
+
+  updateUser(); // chạy ngay khi navbar load
+
+  window.addEventListener("user-updated", updateUser);
+  return () => window.removeEventListener("user-updated", updateUser);
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
