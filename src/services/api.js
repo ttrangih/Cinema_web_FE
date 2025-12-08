@@ -4,14 +4,14 @@ import axios from "axios";
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
-console.log("[API] BASE_URL =", VITE_API_BASE_URL);
+console.log("[API] BASE_URL =", BASE_URL);
 
 const api = axios.create({
-  baseURL: VITE_API_BASE_URLBASE_URL,
+  baseURL: BASE_URL,
 });
 
 export const loginApi = (email, password) => {
-  return api.post ("auth/login", {email, password});
+  return api.post ("/auth/login", {email, password});
 };
 
 //Movies
