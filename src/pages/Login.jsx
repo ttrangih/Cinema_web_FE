@@ -29,17 +29,25 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       setLoading(false);
+      const status = err.response?.status;
       console.error("Login error:", err);
-      if (err.response?.status === 401){
-        setError("Email hoặc mật khẩu không đúng.");
+
+       // Mapping lỗi theo API
+      switch (status) {
+        case 400:
+          setError("Vui lòng nhập đầy đủ email và mật khẩu.");
+          break;
+        case 401:
+          setError("Email hoặc mật khẩu không đúng.");
+          break;
+        case 500:
+          setError("Lỗi server. Vui lòng thử lại sau.");
+          break;
+        default:
+          setError("Đăng nhập không thành công. Vui lòng thử lại.");
       }
-      else{
-      setError(
-        err.response?.data?.message || "Đăng nhập thất bại, vui lòng thử lại."
-      );
     }
-  }
-};
+  };
 
   return (
     <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4">
