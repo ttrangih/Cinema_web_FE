@@ -11,10 +11,10 @@ const api = axios.create({
 });
 
 //login
-export const loginApi = (email, password) => {
-  return api
-    .post("/auth/login", { email, password })
-    .then((res) => res.data);   // trả về body { token, user }
+export const loginApi = async (email, password) => {
+  const res = await api.post("/auth/login", { email, password });
+  // Backend trả { token, user }
+  return res.data;
 };
 
 //register

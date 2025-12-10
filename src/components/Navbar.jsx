@@ -6,36 +6,34 @@ export default function Navbar() {
 
   // user hiện tại
   const [user, setUser] = useState(null);
+
+  // tên hiển thị
   const displayName = user?.fullname || user?.email || "";
- 
 
+  // có phải admin không
+  const isAdmin = user?.role === "ADMIN";
 
-  // dropdown đang mở: "phim" | "rap" | null
+  // dropdown đang mở: "phim" | "rap" | "admin" | null
   const [openMenu, setOpenMenu] = useState(null);
 
-  // đọc user từ localStorage khi Navbar mount
- useEffect(() => {
-  const updateUser = () => {
-    const stored = localStorage.getItem("user");
-    setUser(stored ? JSON.parse(stored) : null);
-  };
+  // đọc user từ localStorage khi Navbar mount + khi có event "user-updated"
+  useEffect(() => {
+    const updateUser = () => {
+      const stored = localStorage.getItem("user");
+      setUser(stored ? JSON.parse(stored) : null);
+    };
 
-  updateUser(); // chạy ngay khi navbar load
+    updateUser(); // chạy ngay khi navbar load
 
-  window.addEventListener("user-updated", updateUser);
-  return () => window.removeEventListener("user-updated", updateUser);
-}, []);
-
+    window.addEventListener("user-updated", updateUser);
+    return () => window.removeEventListener("user-updated", updateUser);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
     navigate("/");
-  };
-
-  const toggleMenu = (key) => {
-    setOpenMenu((prev) => (prev === key ? null : key));
   };
 
   const go = (path) => {
@@ -107,8 +105,9 @@ export default function Navbar() {
     border: "1px solid #444",
     borderRadius: "6px",
     padding: "6px 0",
-    minWidth: "160px",
+    minWidth: "180px",
     boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+    zIndex: 60,
   };
 
   const dropdownItemStyle = {
@@ -145,13 +144,12 @@ export default function Navbar() {
         <div style={menuWrapperStyle}>
           <ul style={menuListStyle}>
             {/* PHIM */}
-            <li style={dropdownContainerStyle}>
-              <span
-                style={menuLinkStyle}
-                onMouseEnter={() => setOpenMenu("phim")}
-                onMouseLeave={() => setOpenMenu(null)}
-
-              >
+            <li
+              style={dropdownContainerStyle}
+              onMouseEnter={() => setOpenMenu("phim")}
+              onMouseLeave={() => setOpenMenu(null)}
+            >
+              <span style={menuLinkStyle}>
                 Phim <span style={{ fontSize: "10px" }}>▼</span>
               </span>
 
@@ -174,13 +172,12 @@ export default function Navbar() {
             </li>
 
             {/* RẠP */}
-            <li style={dropdownContainerStyle}>
-              <span
-                style={menuLinkStyle}
-                onMouseEnter={() => setOpenMenu("rap")}
-                onMouseLeave={() => setOpenMenu(null)}
-
-              >
+            <li
+              style={dropdownContainerStyle}
+              onMouseEnter={() => setOpenMenu("rap")}
+              onMouseLeave={() => setOpenMenu(null)}
+            >
+              <span style={menuLinkStyle}>
                 Rạp <span style={{ fontSize: "10px" }}>▼</span>
               </span>
 
@@ -198,13 +195,40 @@ export default function Navbar() {
 
             {/* Vé của tôi */}
             <li>
-              <span
-                style={menuLinkStyle}
-                onClick={() => go("/my-tickets")}
-              >
+              <span style={menuLinkStyle} onClick={() => go("/my-tickets")}>
                 Vé của tôi
               </span>
             </li>
+
+            {/* ADMIN – chỉ hiện nếu role = ADMIN */}
+            {isAdmin && (
+              <li
+                style={dropdownContainerStyle}
+                onMouseEnter={() => setOpenMenu("admin")}
+                onMouseLeave={() => setOpenMenu(null)}
+              >
+                <span style={menuLinkStyle}>
+                  Admin <span style={{ fontSize: "10px" }}>▼</span>
+                </span>
+
+                {openMenu === "admin" && (
+                  <div style={dropdownStyle}>
+                    <span
+                      style={dropdownItemStyle}
+                      onClick={() => go("/admin/movies")}
+                    >
+                      Quản lý phim
+                    </span>
+                    <span
+                      style={dropdownItemStyle}
+                      onClick={() => go("/admin/showtimes")}
+                    >
+                      Quản lý suất chiếu
+                    </span>
+                  </div>
+                )}
+              </li>
+            )}
           </ul>
         </div>
 
@@ -236,10 +260,7 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => navigate("/login")}
-              style={loginButtonStyle}
-            >
+            <button onClick={() => navigate("/login")} style={loginButtonStyle}>
               Đăng nhập
             </button>
           )}
