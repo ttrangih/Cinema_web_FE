@@ -54,10 +54,41 @@ export const fetchShowtimesByMovie = async (movieId, date) => {
     params: { date },
   });
 
-  console.log("[API] showtimes", movieId, res.data);
-  // BE trả { movieId, cinemas: [...] }
-  return res.data.cinemas || [];
+  const data = res.data;
+
+  // 1. Nếu backend trả sẵn là mảng các suất chiếu phẳng
+  if (Array.isArray(data)) return data;
+
+  // 2. Nếu backend trả { movieId, cinemas: [ { rooms: [ { showtimes: [...] } ] } ] }
+  if (Array.isArray(data?.cinemas)) {
+    const flat = [];
+
+    data.cinemas.forEach((cinema) => {
+      const cinemaName = cinema.cinemaName || cinema.name;
+      const cinemaAddress = cinema.address || "";
+
+      (cinema.rooms || []).forEach((room) => {
+        (room.showtimes || []).forEach((st) => {
+          flat.push({
+            cinemaName,
+            cinemaAddress,
+            roomName: room.roomName,
+            roomId: room.roomId,
+            showtimeId: st.showtimeId || st.id,
+            startTime: st.startTime || st.time,
+            price: st.price,
+          });
+        });
+      });
+    });
+
+    return flat;
+  }
+
+  //Không đúng format thì trả mảng rỗng
+  return [];
 };
+
 
 // Seats
 export const fetchSeatsByShowtime = async (showtimeId) => {

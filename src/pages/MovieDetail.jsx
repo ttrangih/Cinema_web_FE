@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import {fetchMovieDetail,fetchShowtimesByMovie,} from "../services/api"; 
+import { useParams, useNavigate } from "react-router-dom";
+import { fetchMovieDetail, fetchShowtimesByMovie } from "../services/api";
 import "./MovieDetail.css";
 
 export default function MovieDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
@@ -16,7 +17,6 @@ export default function MovieDetail() {
   useEffect(() => {
     if (!id) return;
 
-    // Load thông tin phim
     const loadMovie = async () => {
       try {
         setLoadingMovie(true);
@@ -31,13 +31,11 @@ export default function MovieDetail() {
       }
     };
 
-    // Load suất chiếu theo phim
     const loadShowtimes = async () => {
       try {
         setLoadingShowtimes(true);
         setErrorShowtimes("");
-        const data = await fetchShowtimesByMovie(id); // date để trống → BE tự xử lý
-        // đảm bảo là mảng
+        const data = await fetchShowtimesByMovie(id); // đã flatten ở api.js
         setShowtimes(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load showtimes:", err);
@@ -86,18 +84,24 @@ export default function MovieDetail() {
     }
   }
 
-  const formatShowtime = (raw) => {
-    const d = new Date(
-      raw || ""
-    ); /* nếu parse fail thì trả string gốc bên dưới */
-    if (Number.isNaN(d.getTime())) return raw || "";
-    // ví dụ: 09/12 19:30
-    return d.toLocaleString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
+  // Format ngày + giờ
+  const formatTime = (raw) => {
+    const d = new Date(raw || "");
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString("vi-VN", {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const formatDate = (raw) => {
+    const d = new Date(raw || "");
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("vi-VN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    }); // ví dụ: "Th 4, 10/12"
   };
 
   return (
@@ -171,11 +175,15 @@ export default function MovieDetail() {
                     const address =
                       first.cinemaAddress || first.cinema?.address || "";
 
-                    // sort theo thời gian
-                    const sortedList = [...list].sort((a, b) => {
-                      const da = new Date(a.startTime || a.time || 0).getTime();
-                      const db = new Date(b.startTime || b.time || 0).getTime();
-                      return da - db;
+                    // nhóm tiếp theo ngày
+                    const byDate = {};
+                    list.forEach((st) => {
+                      const dateKey = (st.startTime || st.time || "").slice(
+                        0,
+                        10
+                      ); // YYYY-MM-DD
+                      if (!byDate[dateKey]) byDate[dateKey] = [];
+                      byDate[dateKey].push(st);
                     });
 
                     return (
@@ -192,27 +200,52 @@ export default function MovieDetail() {
                           </div>
                         </div>
 
-                        <div className="showtime-times">
-                          {sortedList.map((st) => {
-                            const key =
-                              st.id || st.showtimeId || st.startTime || st.time;
-                            const timeStr = formatShowtime(
-                              st.startTime || st.time
-                            );
+                        {/* mỗi ngày 1 hàng giờ chiếu */}
+                        {Object.entries(byDate).map(([dateKey, items]) => {
+                          const sorted = [...items].sort((a, b) => {
+                            const da = new Date(
+                              a.startTime || a.time || 0
+                            ).getTime();
+                            const db = new Date(
+                              b.startTime || b.time || 0
+                            ).getTime();
+                            return da - db;
+                          });
 
-                            return (
-                              <button
-                                key={key}
-                                type="button"
-                                className="showtime-chip"
-                                // gắn navigate đến màn chọn ghế
-                                // onClick={() => navigate(`/booking/${key}`)}
-                              >
-                                {timeStr}
-                              </button>
-                            );
-                          })}
-                        </div>
+                          return (
+                            <div
+                              key={dateKey}
+                              className="showtime-date-group"
+                            >
+                              <div className="showtime-date-label">
+                                {formatDate(sorted[0].startTime || sorted[0].time)}
+                              </div>
+                              <div className="showtime-times">
+                                {sorted.map((st) => {
+                                  const key =
+                                    st.showtimeId ||
+                                    st.id ||
+                                    st.startTime ||
+                                    st.time;
+                                  const timeStr = formatTime(
+                                    st.startTime || st.time
+                                  );
+
+                                  return (
+                                    <button
+                                      key={key}
+                                      type="button"
+                                      className="showtime-chip"
+                                      onClick={() => navigate(`/seats/${key}`)}
+                                    >
+                                      {timeStr}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   }

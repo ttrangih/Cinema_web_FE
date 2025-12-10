@@ -155,3 +155,14 @@
   background-color: #8b5cf6;
   color: #ffffff;
 }
+
+.showtime-date-group {
+  margin-top: 8px;
+}
+
+.showtime-date-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e5e5e5;
+  margin-bottom: 6px;
+}
