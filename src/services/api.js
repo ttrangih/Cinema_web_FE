@@ -53,7 +53,10 @@ export const fetchShowtimesByMovie = async (movieId, date) => {
   const res = await api.get(`/movies/${movieId}/showtimes`, {
     params: { date },
   });
-  return res.data;
+
+  console.log("[API] showtimes", movieId, res.data);
+  // BE trả { movieId, cinemas: [...] }
+  return res.data.cinemas || [];
 };
 
 // Seats
