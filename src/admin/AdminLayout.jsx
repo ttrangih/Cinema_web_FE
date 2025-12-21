@@ -1,19 +1,55 @@
-import { Link, Outlet } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import "./Admin.css";
 
 export default function AdminLayout() {
+  const linkClass = ({ isActive }) =>
+    `admin-nav-link ${isActive ? "active" : ""}`;
+
   return (
     <div className="admin-container">
-      <nav className="admin-sidebar">
-        <h2>Admin Panel</h2>
-        <ul>
-          <li><Link to="/admin/movies">🎬 Movies</Link></li>
-          <li><Link to="/admin/showtimes">🕒 Showtimes</Link></li>
-        </ul>
-      </nav>
+      <aside className="admin-sidebar">
+        <div className="admin-brand">
+          <div className="admin-brand-title">Admin Panel</div>
+          <div className="admin-brand-sub">CINEMA</div>
+        </div>
+
+        <nav>
+          <ul className="admin-nav">
+            <li>
+              <NavLink to="/admin/dashboard" className={linkClass}>
+                <span className="admin-nav-icon">📊</span>
+                <span>Dashboard</span>
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink to="/admin/movies" className={linkClass}>
+                <span className="admin-nav-icon">🎬</span>
+                <span>Movies</span>
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink to="/admin/showtimes" className={linkClass}>
+                <span className="admin-nav-icon">🕒</span>
+                <span>Showtimes</span>
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink to="/admin/users" className={linkClass}>
+                <span className="admin-nav-icon">👤</span>
+                <span>Users</span>
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </aside>
 
       <main className="admin-content">
-        <Outlet />
+        <div className="admin-page">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

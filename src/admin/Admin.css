@@ -1,37 +1,223 @@
+/* ===== Admin.css (Synced with app background #2b3f64) ===== */
+
 .admin-container {
-  display: flex;
   min-height: 100vh;
-  background: #f5f6fa;
+  display: flex;
+  color: rgba(255, 255, 255, 0.92);
+  /* không set background để ăn theo background global */
 }
 
 .admin-sidebar {
-  width: 220px;
-  background: #1e1f26;
-  color: white;
-  padding: 20px;
+  width: 260px;
+  padding: 22px 18px;
+  background: rgba(10, 14, 28, 0.62);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
 }
 
 .admin-sidebar h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
+  margin: 0 8px 18px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
-.admin-sidebar ul {
+.admin-nav {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
 }
 
-.admin-sidebar li {
-  margin-bottom: 15px;
-}
-
-.admin-sidebar a {
-  color: white;
+.admin-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
   text-decoration: none;
-  font-size: 16px;
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: 0.18s ease;
+}
+
+.admin-nav a:hover {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: rgba(139, 92, 246, 0.35);
+  transform: translateY(-1px);
 }
 
 .admin-content {
   flex: 1;
-  padding: 30px;
+  padding: 46px 46px 70px;
+}
+
+.admin-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.admin-title {
+  font-size: 64px;
+  margin: 0 0 22px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: rgba(255,255,255,0.92);
+}
+
+.admin-card {
+  background: rgba(10, 14, 28, 0.55);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.admin-input {
+  height: 42px;
+  width: 260px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.28);
+  color: rgba(255,255,255,0.92);
+  outline: none;
+}
+
+.admin-input::placeholder { color: rgba(255,255,255,0.45); }
+
+.admin-input:focus {
+  border-color: rgba(139, 92, 246, 0.55);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.16);
+}
+
+.admin-btn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.92);
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.admin-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.12);
+}
+
+.admin-btn-primary {
+  border: none;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+}
+
+.admin-btn-primary:hover { filter: brightness(1.05); }
+
+.admin-btn-ghost {
+  background: transparent;
+}
+
+.admin-btn-danger {
+  border: 1px solid rgba(255, 92, 108, 0.35);
+  background: rgba(255, 92, 108, 0.12);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.admin-table thead th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.06);
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.admin-table tbody td {
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.admin-poster {
+  width: 58px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+/* ===== Modal create form ===== */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.admin-modal {
+  width: min(620px, 100%);
+  background: rgba(10, 14, 28, 0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.admin-modal-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.admin-modal-body {
+  padding: 16px 18px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-field {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-field label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
 }

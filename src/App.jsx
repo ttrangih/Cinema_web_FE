@@ -16,6 +16,9 @@ import AdminMovies from "./admin/AdminMovies";
 import AdminMovieCreate from "./admin/AdminMovieCreate";
 import AdminMovieEdit from "./admin/AdminMovieEdit";
 import AdminGuard from "./components/AdminGuard";
+import AdminShowtimes from "./admin/AdminShowtimes";
+import AdminUsers from "./admin/AdminUsers";
+
 
 export default function App() {
   return (
@@ -38,20 +41,29 @@ export default function App() {
 
           {/*admin*/}
           <Route
-            path="/admin"
-            element={
-              <AdminGuard>
-                <AdminLayout />
-              </AdminGuard>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
+  path="/admin"
+  element={
+    <AdminGuard>
+      <AdminLayout />
+    </AdminGuard>
+  }
+>
+  {/* Thống kê */}
+  <Route index element={<AdminDashboard />} />
+  <Route path="dashboard" element={<AdminDashboard />} />
 
-            {/* Movie*/}
-            <Route path="movies" element={<AdminMovies />} />
-            <Route path="movies/create" element={<AdminMovieCreate />} />
-            <Route path="movies/:id/edit" element={<AdminMovieEdit />} />
-          </Route> 
+  {/* Movies */}
+  <Route path="movies" element={<AdminMovies />} />
+  <Route path="movies/create" element={<AdminMovieCreate />} />
+  <Route path="movies/:id/edit" element={<AdminMovieEdit />} />
+
+  {/* Showtimes */}
+  <Route path="showtimes" element={<AdminShowtimes />} />
+
+  {/* Users */}
+  <Route path="users" element={<AdminUsers />} />
+</Route>
+
 
           {/* fallback */}
           <Route path="*" element={<Home />} />

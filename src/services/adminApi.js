@@ -1,18 +1,43 @@
-import api from "./api";
+import axios from "axios";
 
-// MOVIES
-export const adminGetMovies = async (q = "", page = 1) =>
-  (await api.get("/admin/movies", { params: { q, page } })).data;
+const adminApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true, // nếu BE dùng cookie
+});
 
-export const adminGetMovie = async (id) =>
-  (await api.get(`/admin/movies/${id}`)).data;
+// Nếu bạn dùng JWT Bearer
+adminApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-export const adminCreateMovie = async (payload) =>
-  (await api.post("/admin/movies", payload)).data;
+// ===== ADMIN MOVIES =====
 
-export const adminUpdateMovie = async (id, payload) =>
-  (await api.put(`/admin/movies/${id}`, payload)).data;
+// GET /api/admin/movies?q=&page=
+export async function adminGetMovies({ q = "", page = 1 }) {
+  const res = await adminApi.get("/api/admin/movies", {
+    params: { q, page },
+  });
+  return res.data;
+}
 
-export const adminDeleteMovie = async (id) =>
-  (await api.delete(`/admin/movies/${id}`)).data;
+// POST /api/admin/movies
+export async function adminCreateMovie(payload) {
+  const res = await adminApi.post("/api/admin/movies", payload);
+  return res.data;
+}
 
+// PUT /api/admin/movies/:id
+export async function adminUpdateMovie(id, payload) {
+  const res = await adminApi.put(`/api/admin/movies/${id}`, payload);
+  return res.data;
+}
+
+// DELETE /api/admin/movies/:id
+export async function adminDeleteMovie(id) {
+  const res = await adminApi.delete(`/api/admin/movies/${id}`);
+  return res.data;
+}
