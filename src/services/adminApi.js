@@ -2,10 +2,10 @@ import axios from "axios";
 
 const adminApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true, // nếu BE dùng cookie
+  withCredentials: true, 
 });
 
-// Nếu bạn dùng JWT Bearer
+
 adminApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -21,8 +21,9 @@ export async function adminGetMovies({ q = "", page = 1 }) {
   const res = await adminApi.get("/api/admin/movies", {
     params: { q, page },
   });
-  return res.data;
+  return res.data; // { items, pagination }
 }
+
 
 // POST /api/admin/movies
 export async function adminCreateMovie(payload) {
@@ -39,5 +40,11 @@ export async function adminUpdateMovie(id, payload) {
 // DELETE /api/admin/movies/:id
 export async function adminDeleteMovie(id) {
   const res = await adminApi.delete(`/api/admin/movies/${id}`);
+  return res.data;
+}
+
+// GET /api/admin/movies/:id
+export async function adminGetMovie(id) {
+  const res = await adminApi.get(`/api/admin/movies/${id}`);
   return res.data;
 }

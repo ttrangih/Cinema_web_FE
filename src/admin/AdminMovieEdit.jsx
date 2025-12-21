@@ -7,7 +7,7 @@ export default function AdminMovieEdit() {
   const nav = useNavigate();
   const [form, setForm] = useState({});
 
-  useEffect(() => { load(); }, []);
+ useEffect(() => { load(); }, [id]);
 
   async function load() {
     const data = await adminGetMovie(id);
