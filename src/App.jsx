@@ -36,18 +36,12 @@ export default function App() {
           <Route path="/my-tickets" element={<Home />} />
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/showtimes/:id" element={<Showtimes />} />
-          <Route path="/seats/:id" element={<Seats />} />
+          <Route path="/showtime/:id/seats" element={<Seats />} />
+          <Route path="/seats/:showtimeId" element={<Seats />} />
           <Route path="/checkout" element={<Checkout />} />
 
           {/*admin*/}
-          <Route
-  path="/admin"
-  element={
-    <AdminGuard>
-      <AdminLayout />
-    </AdminGuard>
-  }
->
+          <Route path="/admin" element={<AdminGuard> <AdminLayout /> </AdminGuard>} >
   {/* Thống kê */}
   <Route index element={<AdminDashboard />} />
   <Route path="dashboard" element={<AdminDashboard />} />

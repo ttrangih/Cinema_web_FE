@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { loginApi } from "../services/api";
 import "./Login.css"; 
 
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +27,9 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       window.dispatchEvent(new Event("user-updated"));
-      navigate("/");
+      const redirectTo = location.state?.from || "/";
+      navigate(redirectTo, { replace: true });
+
     } catch (err) {
       console.error("Login error:", err);
       const status = err?.response?.status;

@@ -1,11 +1,25 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { fetchMovieDetail, fetchShowtimesByMovie } from "../services/api";
+import { isLoggedIn } from "../utils/auth";
 import "./MovieDetail.css";
+
+const startOfLocalDay = (d) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+};
+
+const getLocalDateKey = (iso) => {
+  const d = new Date(iso);          // UTC -> local
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();              // key theo local day
+};
 
 export default function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
@@ -13,6 +27,18 @@ export default function MovieDetail() {
   const [loadingShowtimes, setLoadingShowtimes] = useState(true);
   const [errorMovie, setErrorMovie] = useState("");
   const [errorShowtimes, setErrorShowtimes] = useState("");
+
+  const handlePickShowtime = (showtimeId) => {
+  if (!isLoggedIn()) {
+    navigate("/login", {
+      state: { from: `/seats/${showtimeId}` },
+    });
+    return;
+  }
+
+  navigate(`/seats/${showtimeId}`);
+};
+
 
   useEffect(() => {
     if (!id) return;
@@ -71,10 +97,20 @@ export default function MovieDetail() {
     trailerurl,
   } = movie;
 
+const today = startOfLocalDay(new Date());
+
+const todayShowtimes = showtimes.filter((st) => {
+  const d = startOfLocalDay(new Date(st.startTime));
+  return d.getTime() === today.getTime();
+});
+
+
+
+const displayShowtimes = todayShowtimes;
   // Gom suất chiếu theo rạp
   const showtimesByCinema = {};
-  if (Array.isArray(showtimes)) {
-    for (const st of showtimes) {
+  if (Array.isArray(displayShowtimes)) {
+    for (const st of displayShowtimes) {
       const cinemaName =
         st.cinemaName || st.cinema?.name || "Rạp chưa xác định";
       if (!showtimesByCinema[cinemaName]) {
@@ -84,25 +120,22 @@ export default function MovieDetail() {
     }
   }
 
-  // Format ngày + giờ
-  const formatTime = (raw) => {
-    const d = new Date(raw || "");
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Format ngày giờ
+const formatTime = (raw) => {
+  if (!raw) return "";
+  // raw: 2025-12-21T17:00:00.000Z
+  return raw.slice(11, 16); // "17:00"
+};
 
-  const formatDate = (raw) => {
-    const d = new Date(raw || "");
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleDateString("vi-VN", {
-      weekday: "short",
-      day: "2-digit",
-      month: "2-digit",
-    }); // ví dụ: "Th 4, 10/12"
-  };
+const formatDate = (raw) => {
+  const date = new Date(raw);
+  return date.toLocaleDateString("vi-VN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+};
+
 
   return (
     <div className="movie-detail-page">
@@ -178,10 +211,7 @@ export default function MovieDetail() {
                     // nhóm tiếp theo ngày
                     const byDate = {};
                     list.forEach((st) => {
-                      const dateKey = (st.startTime || st.time || "").slice(
-                        0,
-                        10
-                      ); // YYYY-MM-DD
+                     const dateKey = getLocalDateKey(st.startTime || st.time); // YYYY-MM-DD
                       if (!byDate[dateKey]) byDate[dateKey] = [];
                       byDate[dateKey].push(st);
                     });
@@ -232,13 +262,11 @@ export default function MovieDetail() {
                                   );
 
                                   return (
-                                    <button
-                                      key={key}
-                                      type="button"
-                                      className="showtime-chip"
-                                      onClick={() => navigate(`/seats/${key}`)}
-                                    >
-                                      {timeStr}
+                                    <button key={key}
+                                            type="button"
+                                            className="showtime-chip"
+                                            onClick={() => handlePickShowtime(key)}>
+                                            {timeStr}
                                     </button>
                                   );
                                 })}
