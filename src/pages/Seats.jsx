@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../services/api"; // axios instance của bạn (BASE_URL + interceptors)
+import api from "../services/api";
 import "./Seats.css";
 
 export default function Seats() {
@@ -12,6 +12,16 @@ export default function Seats() {
   const [showtimeInfo, setShowtimeInfo] = useState(null); // optional info if API returns
   const [selected, setSelected] = useState(new Set()); // store seatId
 
+  const [isPayOpen, setIsPayOpen] = useState(false);
+  const closePay = () => setIsPayOpen(false);
+
+  const [payMethod, setPayMethod] = useState("momo"); // momo | vnpay | card
+  const [holdLoading, setHoldLoading] = useState(false);
+  const [bookingId, setBookingId] = useState(null);
+  const [expiresAt, setExpiresAt] = useState(null);
+
+  const [nowTick, setNowTick] = useState(Date.now());
+
   // --- fetch seats by showtimeId ---
   useEffect(() => {
     let mounted = true;
@@ -21,9 +31,7 @@ export default function Seats() {
         setLoading(true);
 
         // API: GET /showtimes/:id/seats
-        // Kỳ vọng trả về dạng: { showtime: {...}, seats: [...] } hoặc chỉ [...].
         const res = await api.get(`/showtimes/${showtimeId}/seats`);
-
         const data = res.data;
 
         // Normalize:
@@ -49,8 +57,6 @@ export default function Seats() {
 
   // ---- group seats by row (A, B, C...) & sort by seatnumber ----
   const grouped = useMemo(() => {
-    // Bạn đang có schema seats: id, seatrow, seatnumber, seattype, isactive
-    // Và trạng thái booked thường sẽ có field: isBooked / status / available...
     const map = new Map();
     for (const s of seatRows) {
       const rowKey = s.seatrow ?? s.row ?? "";
@@ -87,7 +93,6 @@ export default function Seats() {
   }, [seatRows, selected]);
 
   const total = useMemo(() => {
-    // nếu API có price theo ghế -> dùng; không thì dùng showtime price.
     const base = Number(showtimeInfo?.price ?? 0);
     return selectedSeats.reduce((sum, s) => {
       const seatPrice = s.price != null ? Number(s.price) : base;
@@ -99,8 +104,8 @@ export default function Seats() {
   const formatMoney = (n) => (n || 0).toLocaleString("vi-VN") + " đ";
 
   const isBooked = (s) => {
-    // bạn chỉnh theo field thật từ BE:
-    // ví dụ: s.isbooked, s.isBooked, s.status === 'BOOKED', s.available === false...
+    // BE seats API đang trả isReserved
+    if (s.isReserved === true) return true;
     if (s.isBooked === true) return true;
     if (s.isbooked === true) return true;
     if (s.available === false) return true;
@@ -132,46 +137,8 @@ export default function Seats() {
     });
   };
 
-  const handleContinue = async () => {
-    if (selectedSeats.length === 0) {
-      alert("Bạn chưa chọn ghế.");
-      return;
-    }
-
-    // Nếu bạn muốn “bấm tiếp tục là pop up payment luôn”
-    // thì ở đây bạn có thể mở modal payment.
-    // Còn nếu muốn tạo booking trước:
-    // POST /bookings { showtimeId, seatIds: [...] }
-    try {
-      // ⚠️ tuỳ payload BE của bạn (đổi field cho đúng)
-      const payload = {
-        showtimeId: Number(showtimeId),
-        seatIds: selectedSeats.map((s) => Number(s.id ?? s.seatId)),
-      };
-
-      // Nếu endpoint bookings cần token -> axios interceptor sẽ tự gắn Authorization
-      const res = await api.post("/bookings", payload);
-
-      // Sau khi tạo booking OK: mở payment popup / chuyển trang payment
-      // Demo: chuyển sang /payment/:bookingId
-      const bookingId = res.data?.bookingId ?? res.data?.id;
-      alert("Đặt ghế thành công! (Demo) Mở payment ở bước kế tiếp.");
-
-      if (bookingId) navigate(`/payment/${bookingId}`);
-    } catch (err) {
-      console.error("Booking failed:", err);
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Không thể đặt ghế. Có thể ghế vừa bị người khác chọn.";
-      alert(msg);
-    }
-  };
-
   // --- Header info (không có poster) ---
   const meta = useMemo(() => {
-    // Nếu BE seats API không trả showtime info, bạn có thể truyền qua location.state khi navigate từ MovieDetail
-    // hoặc gọi thêm GET /showtimes/:id (nếu có).
     const cinema = showtimeInfo?.cinemaName || showtimeInfo?.cinema || "Rạp";
     const room = showtimeInfo?.roomName || showtimeInfo?.room || "Phòng";
     const start = showtimeInfo?.startTime || showtimeInfo?.starttime;
@@ -181,9 +148,64 @@ export default function Seats() {
       ? dt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
       : "--:--";
     const date = dt ? dt.toLocaleDateString("vi-VN") : "--/--/----";
-
     return { cinema, room, time, date };
   }, [showtimeInfo]);
+
+  // countdown tick only when popup open + has expiresAt
+  useEffect(() => {
+    if (!isPayOpen || !expiresAt) return;
+    const t = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [isPayOpen, expiresAt]);
+
+  const secondsLeft = useMemo(() => {
+    if (!expiresAt) return null;
+    const ms = new Date(expiresAt).getTime() - nowTick;
+    return Math.max(0, Math.floor(ms / 1000));
+  }, [expiresAt, nowTick]);
+
+  // HOLD + open popup
+  const startHoldAndOpenPay = async () => {
+    if (!selectedSeats?.length) {
+      alert("Vui lòng chọn ghế trước khi thanh toán.");
+      return;
+    }
+
+    setHoldLoading(true);
+    try {
+      const payload = {
+        showtimeId: Number(showtimeId),
+        seatIds: selectedSeats.map((s) => Number(s.id ?? s.seatId)),
+      };
+
+      const res = await api.post("/bookings", payload);
+
+      const bid = res.data?.bookingId ?? res.data?.id;
+      const exp = res.data?.expiresAt ?? res.data?.expires_at;
+
+      if (!bid) throw new Error("Missing bookingId from server");
+
+      setBookingId(bid);
+      setExpiresAt(exp || null);
+      setIsPayOpen(true);
+    } catch (err) {
+      console.error("Hold/booking failed:", err);
+
+      if (err?.response?.status === 401) {
+        alert("Bạn cần đăng nhập trước.");
+        navigate("/login");
+        return;
+      }
+
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Không thể giữ ghế. Có thể ghế vừa bị người khác chọn.";
+      alert(msg);
+    } finally {
+      setHoldLoading(false);
+    }
+  };
 
   return (
     <div className="seats-wrap">
@@ -289,18 +311,137 @@ export default function Seats() {
               <b>{formatMoney(total)}</b>
             </div>
 
+            {isPayOpen && secondsLeft != null && (
+              <div className="pay-row">
+                <span>Giữ ghế còn</span>
+                <b>
+                  {Math.floor(secondsLeft / 60)}:
+                  {String(secondsLeft % 60).padStart(2, "0")}
+                </b>
+              </div>
+            )}
+
             <div className="summary-actions">
               <button className="btn btn--ghost" onClick={() => navigate(-1)}>
                 Quay lại
               </button>
 
-              <button className="btn btn--primary" onClick={handleContinue}>
-                Tiếp tục
+              <button
+                className="btn btn--primary"
+                onClick={startHoldAndOpenPay}
+                disabled={!selectedSeats?.length || holdLoading}
+              >
+                {holdLoading ? "Đang giữ ghế..." : "Tiếp tục"}
               </button>
             </div>
           </div>
         </aside>
       </div>
+
+      {/* PAY POPUP */}
+      {isPayOpen && (
+        <div className="pay-overlay" onClick={closePay}>
+          <div className="pay-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pay-header">
+              <div className="pay-title">Thanh toán</div>
+              <button className="pay-close" onClick={closePay}>
+                ✕
+              </button>
+            </div>
+
+            <div className="pay-body">
+              <div className="pay-section">
+                <div className="pay-section-title">Thông tin đặt vé</div>
+
+                <div className="pay-row">
+                  <span>Suất chiếu</span>
+                  <b>
+                    {meta.time} • {meta.date}
+                  </b>
+                </div>
+
+                <div className="pay-row">
+                  <span>Phòng</span>
+                  <b>{meta.room}</b>
+                </div>
+
+                <div className="pay-row">
+                  <span>Ghế</span>
+                  <b>{selectedSeats.map(formatSeatLabel).join(", ")}</b>
+                </div>
+
+                <div className="pay-row">
+                  <span>Số lượng</span>
+                  <b>{selectedSeats.length}</b>
+                </div>
+
+                <div className="pay-total">
+                  <span>Tổng cộng</span>
+                  <b>{formatMoney(total)}</b>
+                </div>
+
+                {secondsLeft != null && (
+                  <div className="pay-row">
+                    <span>Giữ ghế còn</span>
+                    <b>
+                      {Math.floor(secondsLeft / 60)}:
+                      {String(secondsLeft % 60).padStart(2, "0")}
+                    </b>
+                  </div>
+                )}
+              </div>
+
+              <div className="pay-section">
+                <div className="pay-section-title">Phương thức thanh toán</div>
+
+                <div className="pay-methods">
+                  <button
+                    className={`pay-method ${payMethod === "momo" ? "active" : ""}`}
+                    onClick={() => setPayMethod("momo")}
+                    type="button"
+                  >
+                    MoMo
+                  </button>
+
+                  <button
+                    className={`pay-method ${payMethod === "vnpay" ? "active" : ""}`}
+                    onClick={() => setPayMethod("vnpay")}
+                    type="button"
+                  >
+                    VNPay
+                  </button>
+
+                  <button
+                    className={`pay-method ${payMethod === "card" ? "active" : ""}`}
+                    onClick={() => setPayMethod("card")}
+                    type="button"
+                  >
+                    Thẻ
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="pay-footer">
+              <button className="pay-btn ghost" onClick={closePay}>
+                Huỷ
+              </button>
+
+              <button
+                className="pay-btn solid"
+                onClick={() => {
+                  // tạm thời demo
+                  alert(`Demo payment. BookingId=${bookingId ?? "?"}`);
+                  closePay();
+                }}
+                disabled={!selectedSeats.length}
+              >
+                Thanh toán
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

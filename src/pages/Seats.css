@@ -261,3 +261,47 @@
     position: static;
   }
 }
+
+.pay-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pay-modal{
+  width: 520px;
+  max-width: 92vw;
+  background: #121826;
+  color: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+
+.pay-title{
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.pay-row{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.pay-label{ opacity: .75; }
+.pay-value{ font-weight: 600; }
+
+.pay-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
